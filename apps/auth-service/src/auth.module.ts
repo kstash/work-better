@@ -5,7 +5,9 @@ import { PassportModule } from '@nestjs/passport';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { HttpModule } from '@nestjs/axios';
 import { MongooseModule } from '@nestjs/mongoose';
+import { TerminusModule } from '@nestjs/terminus';
 import { AuthController } from './controllers/auth.controller';
+import { HealthController } from './controllers/health.controller';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import {
@@ -13,42 +15,43 @@ import {
   LoginAttemptSchema,
 } from './entities/login-attempt.entity';
 import { LoginAttemptRepository } from './repositories/login-attempt.repository';
+import { getMongoDBConfig, getRedisConfig } from './config/database.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: 'apps/auth-service/.env',
+      envFilePath:
+        process.env.NODE_ENV === 'production'
+          ? 'apps/auth-service/.env.production'
+          : 'apps/auth-service/.env',
     }),
     MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: getMongoDBConfig,
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        uri: `mongodb://${configService.get('MONGO_USERNAME')}:${configService.get('MONGO_PASSWORD')}@${configService.get('MONGO_HOST')}:${configService.get('MONGO_PORT')}/${configService.get('MONGO_DATABASE')}`,
-      }),
     }),
     MongooseModule.forFeature([
       { name: LoginAttempt.name, schema: LoginAttemptSchema },
     ]),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
+    PassportModule,
     JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: '1h',
-        },
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get('JWT_EXPIRES_IN', '1h') },
       }),
+      inject: [ConfigService],
     }),
     RedisModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        type: 'single',
-        url: `redis://:${configService.get('REDIS_PASSWORD')}@${configService.get('REDIS_HOST')}:${configService.get('REDIS_PORT')}`,
-      }),
+      imports: [ConfigModule],
+      useFactory: getRedisConfig,
       inject: [ConfigService],
     }),
     HttpModule,
+    TerminusModule,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, HealthController],
   providers: [AuthService, JwtStrategy, LoginAttemptRepository],
+  exports: [AuthService],
 })
 export class AuthModule {}

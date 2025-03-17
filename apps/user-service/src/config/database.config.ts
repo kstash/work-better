@@ -5,16 +5,16 @@ import { User } from '../entities/user.entity';
 
 export async function createDatabase(config: ConfigService) {
   const client = new Client({
-    host: config.get('DB_HOST'),
-    port: config.get('DB_PORT'),
-    user: config.get('DB_USERNAME'),
-    password: config.get('DB_PASSWORD'),
+    host: config.get<string>('DB_HOST'),
+    port: config.get<number>('DB_PORT'),
+    user: config.get<string>('DB_USERNAME'),
+    password: config.get<string>('DB_PASSWORD'),
     database: 'postgres', // 기본 데이터베이스로 연결
   });
 
   try {
     await client.connect();
-    const dbName = config.get('DB_DATABASE');
+    const dbName = config.get<string>('DB_DATABASE');
 
     // 데이터베이스 존재 여부 확인
     const checkDb = await client.query(
@@ -35,22 +35,22 @@ export async function createDatabase(config: ConfigService) {
   }
 }
 
-export const getDatabaseConfig = async (
+export const getPostgresConfig = async (
   configService: ConfigService,
 ): Promise<TypeOrmModuleOptions> => {
   // 데이터베이스 자동 생성 실행
   await createDatabase(configService);
 
-  const nodeEnv = configService.get('NODE_ENV', 'development');
+  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
   const isDevMode = nodeEnv === 'development';
 
   return {
     type: 'postgres',
-    host: configService.get('DB_HOST'),
-    port: configService.get('DB_PORT'),
-    username: configService.get('DB_USERNAME'),
-    password: configService.get('DB_PASSWORD'),
-    database: configService.get('DB_DATABASE'),
+    host: configService.get<string>('DB_HOST'),
+    port: configService.get<number>('DB_PORT'),
+    username: configService.get<string>('DB_USERNAME'),
+    password: configService.get<string>('DB_PASSWORD'),
+    database: configService.get<string>('DB_DATABASE'),
     entities: [User],
     synchronize: isDevMode, // 개발 환경에서만 true
     logging: isDevMode, // 개발 환경에서만 SQL 로깅
