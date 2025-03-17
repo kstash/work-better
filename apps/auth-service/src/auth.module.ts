@@ -16,6 +16,7 @@ import {
 } from './entities/login-attempt.entity';
 import { LoginAttemptRepository } from './repositories/login-attempt.repository';
 import { getMongoDBConfig, getRedisConfig } from './config/database.config';
+import { jwtConfig } from './config/jwt.config';
 
 @Module({
   imports: [
@@ -36,10 +37,7 @@ import { getMongoDBConfig, getRedisConfig } from './config/database.config';
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get('JWT_EXPIRES_IN', '1h') },
-      }),
+      useFactory: jwtConfig,
       inject: [ConfigService],
     }),
     RedisModule.forRootAsync({
