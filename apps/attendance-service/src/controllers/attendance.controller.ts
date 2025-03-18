@@ -9,10 +9,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { AttendanceService } from '../services/attendance.service';
-import {
-  AttendanceType,
-  ValidationType,
-} from '../interfaces/attendance.interface';
+import { ValidationType } from '../interfaces/attendance.interface';
 
 @Controller('attendance')
 export class AttendanceController {
