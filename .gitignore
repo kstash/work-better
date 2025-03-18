@@ -152,3 +152,4 @@ Desktop.ini
 docker/volumes/
 docker/init/
 docker-compose.yml
+docker-compose.yaml
