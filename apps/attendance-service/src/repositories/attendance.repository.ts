@@ -26,12 +26,12 @@ export class AttendanceRepository {
   async findLatestByUserId(userId: string): Promise<Attendance | null> {
     return this.attendanceModel
       .findOne({ userId })
-      .sort({ timestamp: -1 })
+      .sort({ createdAt: -1 })
       .exec();
   }
 
   async findByUserId(userId: string): Promise<Attendance[]> {
-    return this.attendanceModel.find({ userId }).sort({ timestamp: -1 }).exec();
+    return this.attendanceModel.find({ userId }).sort({ createdAt: -1 }).exec();
   }
 
   async findByDate(userId: string, date: Date): Promise<Attendance[]> {
@@ -44,12 +44,29 @@ export class AttendanceRepository {
     return this.attendanceModel
       .find({
         userId,
-        timestamp: {
+        createdAt: {
           $gte: startOfDay,
           $lte: endOfDay,
         },
       })
-      .sort({ timestamp: -1 })
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async findByDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Attendance[]> {
+    return this.attendanceModel
+      .find({
+        userId,
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      })
+      .sort({ createdAt: -1 })
       .exec();
   }
 }
