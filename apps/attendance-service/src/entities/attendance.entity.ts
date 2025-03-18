@@ -7,6 +7,7 @@ import {
   Location,
   ValidationType,
 } from '../interfaces/attendance.interface';
+import { ValidationData } from '../interfaces/validationData.interface';
 
 @Schema({ timestamps: true })
 export class Attendance extends Document {
@@ -20,9 +21,6 @@ export class Attendance extends Document {
   })
   type: AttendanceType;
 
-  @Prop({ required: true })
-  timestamp: Date;
-
   @Prop({
     required: true,
     type: String,
@@ -31,7 +29,7 @@ export class Attendance extends Document {
   validationType: ValidationType;
 
   @Prop({ type: Object })
-  validationData: any;
+  validationData: ValidationData;
 
   @Prop({
     required: true,
