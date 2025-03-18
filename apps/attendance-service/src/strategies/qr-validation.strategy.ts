@@ -1,31 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { IAttendanceValidationStrategy } from '../../interfaces/attendance.interface';
-
-interface QRValidationData {
-  scannedCode: string;
-  validCodes: string[];
-  timestamp: Date;
-  expirationTime: number; // 밀리초 단위
-}
+import { IAttendanceValidationStrategy } from '../interfaces/attendance.interface';
+import { QRValidationData } from '../interfaces/validationData.interface';
 
 @Injectable()
 export class QRValidationStrategy implements IAttendanceValidationStrategy {
-  async validate(data: QRValidationData): Promise<boolean> {
+  async validate(data: any): Promise<boolean> {
+    const qrData = data as QRValidationData;
     // QR 코드가 유효한 코드 목록에 있는지 확인
-    if (!data.validCodes.includes(data.scannedCode)) {
+    if (!qrData.validCodes.includes(qrData.scannedCode)) {
       return false;
     }
 
     // QR 코드의 만료 시간 확인
-    const codeData = this.decodeQRData(data.scannedCode);
+    const codeData = this.decodeQRData(qrData.scannedCode);
     if (!codeData || !codeData.generatedAt) {
       return false;
     }
 
     const generatedTime = new Date(codeData.generatedAt).getTime();
-    const currentTime = data.timestamp.getTime();
+    const currentTime = qrData.timestamp.getTime();
 
-    return currentTime - generatedTime <= data.expirationTime;
+    return currentTime - generatedTime <= qrData.expirationTime;
   }
 
   private decodeQRData(code: string): { generatedAt: string } | null {

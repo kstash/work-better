@@ -1,23 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import {
-  IAttendanceValidationStrategy,
   Location,
-} from '../../interfaces/attendance.interface';
-
-interface GPSValidationData {
-  userLocation: Location;
-  officeLocation: Location;
-  maxDistance: number; // 미터 단위
-}
+  IAttendanceValidationStrategy,
+} from '../interfaces/attendance.interface';
+import { GPSValidationData } from '../interfaces/validationData.interface';
 
 @Injectable()
 export class GPSValidationStrategy implements IAttendanceValidationStrategy {
-  async validate(data: GPSValidationData): Promise<boolean> {
+  async validate(data: any): Promise<boolean> {
+    const gpsData = data as GPSValidationData;
     const distance = this.calculateDistance(
-      data.userLocation,
-      data.officeLocation,
+      gpsData.userLocation,
+      gpsData.officeLocation,
     );
-    return distance <= data.maxDistance;
+    return distance <= gpsData.maxDistance;
   }
 
   private calculateDistance(point1: Location, point2: Location): number {
