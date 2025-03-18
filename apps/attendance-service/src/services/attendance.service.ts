@@ -1,14 +1,14 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { AttendanceRepository } from '../repositories/attendance.repository';
 import { Attendance } from '../entities/attendance.entity';
-import { GPSValidationStrategy } from './validation/gps-validation.strategy';
-import { QRValidationStrategy } from './validation/qr-validation.strategy';
+import { GPSValidationStrategy, QRValidationStrategy } from '../strategies';
 import {
   AttendanceType,
   ValidationType,
   AttendanceStatus,
   AttendanceMethod,
-} from '../interfaces/attendance.interface';
+  ValidationData,
+} from '../interfaces';
 
 @Injectable()
 export class AttendanceService {
@@ -21,7 +21,7 @@ export class AttendanceService {
   async checkIn(
     userId: string,
     validationType: ValidationType,
-    validationData: any,
+    validationData: ValidationData,
   ): Promise<Attendance> {
     // 이미 체크인했는지 확인
     const latestAttendance =
@@ -29,7 +29,7 @@ export class AttendanceService {
     if (
       latestAttendance &&
       latestAttendance.type === AttendanceType.CHECK_IN &&
-      this.isSameDay(latestAttendance.timestamp, new Date())
+      this.isSameDay(latestAttendance.createdAt, new Date())
     ) {
       throw new BadRequestException('Already checked in today');
     }
@@ -50,21 +50,19 @@ export class AttendanceService {
     return this.attendanceRepository.create({
       userId,
       type: AttendanceType.CHECK_IN,
-      timestamp: new Date(),
       validationType,
       validationData,
       method:
         validationType === ValidationType.GPS
           ? AttendanceMethod.GPS
           : AttendanceMethod.QR,
-      status: AttendanceStatus.PENDING,
     });
   }
 
   async checkOut(
     userId: string,
     validationType: ValidationType,
-    validationData: any,
+    validationData: ValidationData,
   ): Promise<Attendance> {
     // 오늘 체크인 했는지 확인
     const latestAttendance =
@@ -72,7 +70,7 @@ export class AttendanceService {
     if (
       !latestAttendance ||
       latestAttendance.type !== AttendanceType.CHECK_IN ||
-      !this.isSameDay(latestAttendance.timestamp, new Date())
+      !this.isSameDay(latestAttendance.createdAt, new Date())
     ) {
       throw new BadRequestException('No check-in record found for today');
     }
@@ -93,14 +91,12 @@ export class AttendanceService {
     return this.attendanceRepository.create({
       userId,
       type: AttendanceType.CHECK_OUT,
-      timestamp: new Date(),
       validationType,
       validationData,
       method:
         validationType === ValidationType.GPS
           ? AttendanceMethod.GPS
           : AttendanceMethod.QR,
-      status: AttendanceStatus.PENDING,
     });
   }
 
@@ -109,7 +105,33 @@ export class AttendanceService {
   }
 
   async getAttendanceByDate(userId: string, date: Date): Promise<Attendance[]> {
-    return this.attendanceRepository.findByDate(userId, date);
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return this.attendanceRepository.findByDateRange(
+      userId,
+      startOfDay,
+      endOfDay,
+    );
+  }
+
+  async getAttendanceByDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Attendance[]> {
+    const startOfDay = new Date(startDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(endDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return this.attendanceRepository.findByDateRange(
+      userId,
+      startOfDay,
+      endOfDay,
+    );
   }
 
   async approveAttendance(id: string, approverId: string): Promise<Attendance> {

@@ -39,7 +39,6 @@ export interface IAttendanceRecord {
   id: string;
   userId: string;
   type: AttendanceType;
-  timestamp: Date;
   method: AttendanceMethod;
   status: AttendanceStatus;
   location?: Location;
