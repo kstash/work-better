@@ -17,6 +17,8 @@ import {
 import { LoginAttemptRepository } from './repositories/login-attempt.repository';
 import { getMongoDBConfig, getRedisConfig } from './config/database.config';
 import { jwtConfig } from './config/jwt.config';
+import { RedisHealthIndicator } from './health/redis.health';
+import { UserServiceHealthIndicator } from './health/user-service.health';
 
 @Module({
   imports: [
@@ -49,7 +51,13 @@ import { jwtConfig } from './config/jwt.config';
     TerminusModule,
   ],
   controllers: [AuthController, HealthController],
-  providers: [AuthService, JwtStrategy, LoginAttemptRepository],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    LoginAttemptRepository,
+    RedisHealthIndicator,
+    UserServiceHealthIndicator,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
