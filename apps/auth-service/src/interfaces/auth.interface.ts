@@ -1,8 +1,10 @@
+export type TokenType = 'access' | 'refresh';
+
 export interface TokenPayload {
   sub: string; // 사용자 ID
   email: string;
   role: string;
-  type: 'access' | 'refresh';
+  type: TokenType;
   iat?: number; // 발급 시간
   exp?: number; // 만료 시간
 }

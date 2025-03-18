@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { HttpModule } from '@nestjs/axios';
 import { PassportModule } from '@nestjs/passport';
+import { TerminusModule } from '@nestjs/terminus';
 import { Leave, LeaveSchema } from './entities/leave.entity';
 import {
   LeaveBalance,
@@ -11,32 +12,26 @@ import {
 } from './entities/leave-balance.entity';
 import { LeaveService } from './services/leave.service';
 import { LeaveController } from './controllers/leave.controller';
+import { HealthController } from './controllers/health.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LeaveRepository } from './repositories/leave.repository';
 import { LeaveBalanceRepository } from './repositories/leave-balance.repository';
+import { getMongoDBConfig, getRedisConfig } from './config/database.config';
+import { RedisHealthIndicator } from './health/redis.health';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: 'apps/leave-service/.env',
+      envFilePath:
+        process.env.NODE_ENV === 'production'
+          ? 'apps/leave-service/.env.production'
+          : 'apps/leave-service/.env',
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const host = configService.get('MONGO_HOST');
-        const port = configService.get('MONGO_PORT');
-        const username = configService.get('MONGO_USERNAME');
-        const password = configService.get('MONGO_PASSWORD');
-        const database = configService.get('MONGO_DATABASE');
-
-        const uri = `mongodb://${username}:${password}@${host}:${port}/${database}`;
-
-        return {
-          uri,
-        };
-      },
+      useFactory: getMongoDBConfig,
       inject: [ConfigService],
     }),
     MongooseModule.forFeature([
@@ -45,27 +40,20 @@ import { LeaveBalanceRepository } from './repositories/leave-balance.repository'
     ]),
     RedisModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'single',
-        url: `redis://:${configService.get('REDIS_PASSWORD')}@${configService.get('REDIS_HOST')}:${configService.get('REDIS_PORT')}`,
-      }),
+      useFactory: getRedisConfig,
       inject: [ConfigService],
     }),
     HttpModule,
+    TerminusModule,
   ],
-  controllers: [LeaveController],
+  controllers: [LeaveController, HealthController],
   providers: [
     LeaveService,
     JwtStrategy,
     LeaveRepository,
     LeaveBalanceRepository,
-    {
-      provide: 'AUTH_SERVICE',
-      useFactory: (configService: ConfigService) => {
-        return configService.get('AUTH_SERVICE_URL');
-      },
-      inject: [ConfigService],
-    },
+    RedisHealthIndicator,
   ],
+  exports: [LeaveService],
 })
 export class LeaveModule {}
