@@ -53,13 +53,7 @@ import { RedisHealthIndicator } from './health/redis.health';
     LeaveRepository,
     LeaveBalanceRepository,
     RedisHealthIndicator,
-    {
-      provide: 'AUTH_SERVICE',
-      useFactory: (configService: ConfigService) => {
-        return configService.get('AUTH_SERVICE_URL');
-      },
-      inject: [ConfigService],
-    },
   ],
+  exports: [LeaveService],
 })
 export class LeaveModule {}

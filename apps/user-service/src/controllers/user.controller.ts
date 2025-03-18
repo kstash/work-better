@@ -6,13 +6,13 @@ import {
   Delete,
   Body,
   Param,
-  HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { IUser } from '../interfaces/user.interface';
+import { IUser, ICredentials } from '../interfaces';
 import * as bcrypt from 'bcrypt';
+import { excludePassword } from '../utils';
 
 @Controller('users')
 export class UserController {
@@ -24,9 +24,7 @@ export class UserController {
   }
 
   @Post('validate')
-  async validateUser(
-    @Body() credentials: { email: string; password: string },
-  ): Promise<IUser> {
+  async validateUser(@Body() credentials: ICredentials): Promise<IUser> {
     const user = await this.userService.findByEmail(credentials.email);
     const isValid = await bcrypt.compare(credentials.password, user.password);
 
@@ -34,8 +32,7 @@ export class UserController {
       throw new UnauthorizedException('이메일 또는 비밀번호가 잘못되었습니다.');
     }
 
-    const { password, ...result } = user;
-    return result;
+    return excludePassword(user);
   }
 
   @Get(':id')
@@ -46,8 +43,7 @@ export class UserController {
   @Get('email/:email')
   async getUserByEmail(@Param('email') email: string): Promise<IUser> {
     const user = await this.userService.findByEmail(email);
-    const { password, ...result } = user;
-    return result;
+    return excludePassword(user);
   }
 
   @Put(':id')

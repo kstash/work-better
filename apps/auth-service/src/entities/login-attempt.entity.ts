@@ -13,9 +13,6 @@ export class LoginAttempt extends Document {
   @Prop({ required: true })
   success: boolean;
 
-  @Prop({ required: true })
-  timestamp: Date;
-
   @Prop({
     required: true,
     type: String,
@@ -31,6 +28,12 @@ export class LoginAttempt extends Document {
 
   @Prop()
   additionalInfo?: string;
+
+  @Prop()
+  createdAt: Date;
+
+  @Prop()
+  updatedAt: Date;
 }
 
 export const LoginAttemptSchema = SchemaFactory.createForClass(LoginAttempt);
