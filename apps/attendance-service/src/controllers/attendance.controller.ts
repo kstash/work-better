@@ -9,7 +9,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { AttendanceService } from '../services/attendance.service';
-import { ValidationType } from '../interfaces/attendance.interface';
+import { ValidationDataType, ValidationTypeEnum } from '../interfaces';
 
 @Controller('attendance')
 export class AttendanceController {
@@ -20,8 +20,8 @@ export class AttendanceController {
     @Body()
     body: {
       userId: string;
-      validationType: ValidationType;
-      validationData: any;
+      validationType: ValidationTypeEnum;
+      validationData: ValidationDataType;
     },
   ) {
     return this.attendanceService.checkIn(
@@ -36,8 +36,8 @@ export class AttendanceController {
     @Body()
     body: {
       userId: string;
-      validationType: ValidationType;
-      validationData: any;
+      validationType: ValidationTypeEnum;
+      validationData: ValidationDataType;
     },
   ) {
     return this.attendanceService.checkOut(

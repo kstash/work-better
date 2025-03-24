@@ -7,10 +7,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { User } from '../entities/user.entity';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { IUser } from '../interfaces/user.interface';
+import { CreateUserDto, UpdateUserDto } from '../dtos';
+import { User, IUser, UserRole } from '@work-better/common';
+import { DeepPartial } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -102,5 +101,53 @@ export class UserService {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
     await this.userRepository.remove(user);
+  }
+
+  async findOrCreateGoogleUser(googleProfile: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    profileImage: string;
+    googleId: string;
+    googleAccessToken: string;
+    googleRefreshToken: string;
+    googleTokenExpiry: Date;
+  }): Promise<IUser> {
+    // 이메일로 사용자 검색
+    const existingUser = await this.userRepository.findOne({
+      where: { email: googleProfile.email },
+    });
+
+    // 기존 사용자 존재하면 반환
+    if (existingUser) {
+      // 프로필 정보 업데이트
+      existingUser.googleId = googleProfile.googleId;
+      existingUser.googleAccessToken = googleProfile.googleAccessToken;
+      existingUser.googleRefreshToken = googleProfile.googleRefreshToken;
+      existingUser.googleTokenExpiry = googleProfile.googleTokenExpiry;
+
+      await this.userRepository.save(existingUser);
+
+      const { password, ...result } = existingUser;
+      return result;
+    }
+
+    // 새 사용자 생성
+    const randomPassword = Math.random().toString(36).substring(2, 15);
+    const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS', 10);
+    const hashedPassword = await bcrypt.hash(randomPassword, saltRounds);
+    const { firstName, lastName } = googleProfile;
+
+    const newUser = this.userRepository.create({
+      ...googleProfile,
+      name: `${firstName} ${lastName}`,
+      password: hashedPassword,
+      role: UserRole.EMPLOYEE,
+      isActive: true,
+    });
+
+    await this.userRepository.save(newUser);
+    const { password, ...result } = newUser;
+    return result;
   }
 }

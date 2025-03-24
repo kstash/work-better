@@ -1,4 +1,9 @@
-export type TokenType = 'access' | 'refresh';
+export enum TokenTypeEnum {
+  ACCESS = 'access',
+  REFRESH = 'refresh',
+}
+
+export type TokenType = TokenTypeEnum.ACCESS | TokenTypeEnum.REFRESH;
 
 export interface TokenPayload {
   sub: string; // 사용자 ID
@@ -18,19 +23,4 @@ export interface LoginResponse {
 export interface RefreshTokenResponse {
   accessToken: string;
   expiresIn: number;
-}
-
-export enum LoginStatus {
-  SUCCESS = 'SUCCESS',
-  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
-  ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
-  ACCOUNT_DISABLED = 'ACCOUNT_DISABLED',
-}
-
-export interface LoginAttempt {
-  userId: string;
-  timestamp: Date;
-  status: LoginStatus;
-  ipAddress: string;
-  userAgent: string;
 }

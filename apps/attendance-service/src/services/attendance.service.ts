@@ -3,11 +3,11 @@ import { AttendanceRepository } from '../repositories/attendance.repository';
 import { Attendance } from '../entities/attendance.entity';
 import { GPSValidationStrategy, QRValidationStrategy } from '../strategies';
 import {
-  AttendanceType,
-  ValidationType,
+  AttendanceTypeEnum,
+  ValidationTypeEnum,
   AttendanceStatus,
-  AttendanceMethod,
-  ValidationData,
+  AttendanceMethodEnum,
+  ValidationDataType,
 } from '../interfaces';
 
 @Injectable()
@@ -20,15 +20,15 @@ export class AttendanceService {
 
   async checkIn(
     userId: string,
-    validationType: ValidationType,
-    validationData: ValidationData,
+    validationType: ValidationTypeEnum,
+    validationData: ValidationDataType,
   ): Promise<Attendance> {
     // 이미 체크인했는지 확인
     const latestAttendance =
       await this.attendanceRepository.findLatestByUserId(userId);
     if (
       latestAttendance &&
-      latestAttendance.type === AttendanceType.CHECK_IN &&
+      latestAttendance.type === AttendanceTypeEnum.CHECK_IN &&
       this.isSameDay(latestAttendance.createdAt, new Date())
     ) {
       throw new BadRequestException('Already checked in today');
@@ -36,7 +36,7 @@ export class AttendanceService {
 
     // 유효성 검사 전략 선택
     const validationStrategy =
-      validationType === ValidationType.GPS
+      validationType === ValidationTypeEnum.GPS
         ? this.gpsValidationStrategy
         : this.qrValidationStrategy;
 
@@ -49,27 +49,27 @@ export class AttendanceService {
     // 출근 기록 생성
     return this.attendanceRepository.create({
       userId,
-      type: AttendanceType.CHECK_IN,
+      type: AttendanceTypeEnum.CHECK_IN,
       validationType,
       validationData,
       method:
-        validationType === ValidationType.GPS
-          ? AttendanceMethod.GPS
-          : AttendanceMethod.QR,
+        validationType === ValidationTypeEnum.GPS
+          ? AttendanceMethodEnum.GPS
+          : AttendanceMethodEnum.QR,
     });
   }
 
   async checkOut(
     userId: string,
-    validationType: ValidationType,
-    validationData: ValidationData,
+    validationType: ValidationTypeEnum,
+    validationData: ValidationDataType,
   ): Promise<Attendance> {
     // 오늘 체크인 했는지 확인
     const latestAttendance =
       await this.attendanceRepository.findLatestByUserId(userId);
     if (
       !latestAttendance ||
-      latestAttendance.type !== AttendanceType.CHECK_IN ||
+      latestAttendance.type !== AttendanceTypeEnum.CHECK_IN ||
       !this.isSameDay(latestAttendance.createdAt, new Date())
     ) {
       throw new BadRequestException('No check-in record found for today');
@@ -77,7 +77,7 @@ export class AttendanceService {
 
     // 유효성 검사 전략 선택
     const validationStrategy =
-      validationType === ValidationType.GPS
+      validationType === ValidationTypeEnum.GPS
         ? this.gpsValidationStrategy
         : this.qrValidationStrategy;
 
@@ -90,13 +90,13 @@ export class AttendanceService {
     // 퇴근 기록 생성
     return this.attendanceRepository.create({
       userId,
-      type: AttendanceType.CHECK_OUT,
+      type: AttendanceTypeEnum.CHECK_OUT,
       validationType,
       validationData,
       method:
-        validationType === ValidationType.GPS
-          ? AttendanceMethod.GPS
-          : AttendanceMethod.QR,
+        validationType === ValidationTypeEnum.GPS
+          ? AttendanceMethodEnum.GPS
+          : AttendanceMethodEnum.QR,
     });
   }
 

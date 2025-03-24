@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -7,18 +7,29 @@ import { Redis } from 'ioredis';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { LoginAttempt } from '../entities/login-attempt.entity';
+import { LoginAttempt } from '../entities';
+import { LoginAttemptDto } from '../dtos';
 import {
   TokenPayload,
   LoginResponse,
   RefreshTokenResponse,
-  LoginStatus,
-} from '../interfaces/auth.interface';
-import { LoginAttemptRepository } from '../repositories/login-attempt.repository';
-import { User } from '@work-better/common';
+  LoginAttemptStatusEnum,
+  TokenTypeEnum,
+  GoogleProfile,
+} from '../interfaces';
+import { LoginAttemptRepository } from '../repositories';
+import { ICredential, User } from '@work-better/common';
+import {
+  AccountLockedException,
+  AuthenticationException,
+  InvalidCredentialsException,
+  InvalidTokenException,
+  UserServiceUnavailableException,
+} from '../exceptions';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly jwtAccessExpiration: number;
   private readonly jwtRefreshExpiration: number;
   private readonly maxLoginAttempts: number;
@@ -40,36 +51,28 @@ export class AuthService {
       this.configService.get<number>('MAX_LOGIN_ATTEMPTS') ?? 5;
   }
 
-  async validateUser(email: string, password: string): Promise<User> {
+  async validateUserLogin(
+    credentials: ICredential,
+    ipAddress: string,
+    userAgent: string,
+  ): Promise<User> {
+    let status = LoginAttemptStatusEnum.SUCCESS;
     try {
       const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL');
       const response = await firstValueFrom(
-        this.httpService.post(`${userServiceUrl}/users/validate`, {
-          email,
-          password,
-        }),
+        this.httpService.post(`${userServiceUrl}/users/validate`, credentials),
       );
-
-      const user = response.data as User;
-
-      // 로그인 시도 기록 저장
-      await this.loginAttemptRepository.create({
-        userId: user.id,
-        username: email,
-        success: true,
-      });
-
-      return user;
+      return response.data as User;
     } catch (error) {
-      // 실패한 로그인 시도 기록
-      if (email) {
-        await this.loginAttemptRepository.create({
-          username: email,
-          success: false,
-        });
-      }
-
-      throw new UnauthorizedException(error, 'Invalid credentials');
+      status = LoginAttemptStatusEnum.FAIL;
+      this.handleAuthError(error);
+    } finally {
+      await this.recordLoginAttempt({
+        email: credentials.email,
+        status,
+        ipAddress,
+        userAgent,
+      });
     }
   }
 
@@ -78,21 +81,19 @@ export class AuthService {
     ipAddress: string,
     userAgent: string,
   ): Promise<LoginResponse> {
-    const attempts = await this.getLoginAttempts(user.id);
+    const attempts = await this.getLoginAttempts(user.email);
     if (attempts >= this.maxLoginAttempts) {
-      throw new UnauthorizedException(
-        '계정이 잠겼습니다. 잠시 후 다시 시도해주세요.',
-      );
+      throw new AccountLockedException();
     }
 
-    const tokens = await this.generateTokens(user);
-
     await this.recordLoginAttempt({
-      userId: user.id,
-      status: LoginStatus.SUCCESS,
+      email: user.email,
+      status: LoginAttemptStatusEnum.SUCCESS,
       ipAddress,
       userAgent,
     });
+
+    const tokens = await this.generateTokens(user);
 
     await this.redis.set(
       `refresh_token:${user.id}`,
@@ -114,7 +115,7 @@ export class AuthService {
       const storedToken = await this.redis.get(`refresh_token:${payload.sub}`);
 
       if (!storedToken || storedToken !== refreshToken) {
-        throw new UnauthorizedException('유효하지 않은 리프레시 토큰입니다.');
+        throw new InvalidTokenException('유효하지 않은 리프레시 토큰입니다.');
       }
 
       const accessToken = this.generateAccessToken(
@@ -128,15 +129,86 @@ export class AuthService {
         expiresIn: this.jwtAccessExpiration,
       };
     } catch (error) {
-      throw new UnauthorizedException(
-        error,
-        '유효하지 않은 리프레시 토큰입니다.',
-      );
+      if (error instanceof InvalidTokenException) {
+        throw error;
+      }
+      throw new InvalidTokenException('유효하지 않은 리프레시 토큰입니다.');
     }
   }
 
   async logout(userId: string): Promise<void> {
     await this.redis.del(`refresh_token:${userId}`);
+  }
+
+  async validateOrCreateGoogleUser(
+    googleProfile: GoogleProfile,
+    ipAddress: string,
+    userAgent: string,
+  ): Promise<LoginResponse> {
+    this.logger.log(`Google 로그인 시도: ${googleProfile.email}`);
+
+    try {
+      const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL');
+
+      // 사용자 서비스에 Google 사용자 검증 요청
+      const response = await firstValueFrom(
+        this.httpService.post(`${userServiceUrl}/users/oauth/google`, {
+          email: googleProfile.email,
+          firstName: googleProfile.firstName,
+          lastName: googleProfile.lastName,
+          picture: googleProfile.picture,
+          googleId: googleProfile.id,
+        }),
+      );
+
+      const user = response.data as User;
+
+      // 로그인 기록
+      await this.recordLoginAttempt({
+        email: user.email,
+        status: LoginAttemptStatusEnum.SUCCESS,
+        ipAddress,
+        userAgent,
+      });
+
+      // 토큰 생성
+      const tokens = await this.generateTokens(user);
+
+      // 리프레시 토큰 저장
+      await this.redis.set(
+        `refresh_token:${user.id}`,
+        tokens.refreshToken,
+        'EX',
+        this.jwtRefreshExpiration,
+      );
+
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: this.jwtAccessExpiration,
+      };
+    } catch (error) {
+      this.logger.error(`Google 사용자 검증 실패: ${error.message}`);
+      this.handleAuthError(error);
+    }
+  }
+
+  private handleAuthError(error: any): never {
+    if (error.response) {
+      // HTTP 응답이 있는 경우
+      const status = error.response.status;
+      if (status === 401) {
+        throw new InvalidCredentialsException();
+      } else {
+        throw new AuthenticationException();
+      }
+    } else if (error.request) {
+      // 요청은 전송되었지만 응답이 없는 경우
+      throw new UserServiceUnavailableException();
+    } else {
+      // 요청 설정에 오류가 발생한 경우
+      throw new AuthenticationException();
+    }
   }
 
   private async generateTokens(user: User): Promise<{
@@ -160,7 +232,7 @@ export class AuthService {
       sub: userId,
       email,
       role,
-      type: 'access',
+      type: TokenTypeEnum.ACCESS,
     };
 
     return this.jwtService.sign(payload, {
@@ -177,7 +249,7 @@ export class AuthService {
       sub: userId,
       email,
       role,
-      type: 'refresh',
+      type: TokenTypeEnum.REFRESH,
     };
 
     return this.jwtService.sign(payload, {
@@ -185,37 +257,27 @@ export class AuthService {
     });
   }
 
-  private async recordLoginAttempt(data: {
-    userId: string;
-    status: LoginStatus;
-    ipAddress: string;
-    userAgent: string;
-  }): Promise<void> {
-    const attempt = new this.loginAttemptModel({
-      ...data,
-    });
-    await attempt.save();
+  private async recordLoginAttempt(
+    loginAttempt: LoginAttemptDto,
+  ): Promise<void> {
+    try {
+      const attempt = new this.loginAttemptModel({
+        ...loginAttempt,
+      });
+      await attempt.save();
+    } catch (error) {
+      this.logger.error(`로그인 시도 기록 실패: ${error.message}`);
+      // 로그인 시도 기록 실패는 사용자 인증 흐름에 영향을 주지 않도록 함
+    }
   }
 
-  private async getLoginAttempts(userId: string): Promise<number> {
+  private async getLoginAttempts(email: string): Promise<number> {
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
 
     return this.loginAttemptModel.countDocuments({
-      userId,
-      status: LoginStatus.INVALID_CREDENTIALS,
+      email,
+      status: LoginAttemptStatusEnum.FAIL,
       createdAt: { $gte: fifteenMinutesAgo },
     });
-  }
-
-  private async getUserByEmail(email: string): Promise<User> {
-    try {
-      const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL');
-      const response = await firstValueFrom(
-        this.httpService.get(`${userServiceUrl}/users/email/${email}`),
-      );
-      return response.data as User;
-    } catch (error) {
-      throw new UnauthorizedException(error, '사용자를 찾을 수 없습니다.');
-    }
   }
 }

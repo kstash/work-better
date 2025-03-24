@@ -1,5 +1,5 @@
 import { IsEnum, IsString, IsDateString, IsNotEmpty } from 'class-validator';
-import { LeaveType } from '../entities/leave.entity';
+import { LeaveTypeEnum } from '../interfaces';
 
 export class CreateLeaveDto {
   @IsDateString()
@@ -10,9 +10,9 @@ export class CreateLeaveDto {
   @IsNotEmpty()
   endDate: string;
 
-  @IsEnum(LeaveType)
+  @IsEnum(LeaveTypeEnum)
   @IsNotEmpty()
-  type: LeaveType;
+  type: LeaveTypeEnum;
 
   @IsString()
   @IsNotEmpty()

@@ -6,13 +6,10 @@ import {
 } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Redis } from 'ioredis';
-import { Leave, LeaveStatus, LeaveType } from '../entities/leave.entity';
-import { LeaveBalance } from '../entities/leave-balance.entity';
-import { CreateLeaveDto } from '../dto/create-leave.dto';
-import { UpdateLeaveStatusDto } from '../dto/update-leave-status.dto';
-import { LeaveRepository } from '../repositories/leave.repository';
-import { LeaveBalanceRepository } from '../repositories/leave-balance.repository';
-
+import { Leave, LeaveBalance } from '../entities';
+import { CreateLeaveDto, UpdateLeaveStatusDto } from '../dtos';
+import { LeaveRepository, LeaveBalanceRepository } from '../repositories';
+import { LeaveStatusEnum, LeaveTypeEnum } from '../interfaces';
 @Injectable()
 export class LeaveService {
   constructor(
@@ -36,7 +33,7 @@ export class LeaveService {
     // 휴가 잔여일수 확인
     const balance = await this.leaveBalanceRepository.findOrCreate(userId);
     const availableDays =
-      createLeaveDto.type === LeaveType.ANNUAL
+      createLeaveDto.type === LeaveTypeEnum.ANNUAL
         ? balance.remainingAnnualLeave
         : balance.remainingSickLeave;
 
@@ -65,11 +62,11 @@ export class LeaveService {
       days,
       type: createLeaveDto.type,
       reason: createLeaveDto.reason,
-      status: LeaveStatus.PENDING,
+      status: LeaveStatusEnum.PENDING,
     });
 
     // 휴가 잔여일수 업데이트
-    if (createLeaveDto.type === LeaveType.ANNUAL) {
+    if (createLeaveDto.type === LeaveTypeEnum.ANNUAL) {
       balance.remainingAnnualLeave -= days;
     } else {
       balance.remainingSickLeave -= days;
@@ -109,20 +106,20 @@ export class LeaveService {
       throw new ForbiddenException('Unauthorized to cancel this leave');
     }
 
-    if (leave.status !== LeaveStatus.PENDING) {
+    if (leave.status !== LeaveStatusEnum.PENDING) {
       throw new BadRequestException('Can only cancel pending leave requests');
     }
 
     // 휴가 상태 업데이트
     const updatedLeave = await this.leaveRepository.update(leaveId, {
-      status: LeaveStatus.CANCELLED,
+      status: LeaveStatusEnum.CANCELLED,
     });
 
     // 휴가 잔여일수 복구
     const balance = await this.leaveBalanceRepository.findByUserId(userId);
     if (balance) {
       const days = this.calculateLeaveDays(leave.startDate, leave.endDate);
-      if (leave.type === LeaveType.ANNUAL) {
+      if (leave.type === LeaveTypeEnum.ANNUAL) {
         balance.remainingAnnualLeave += days;
       } else {
         balance.remainingSickLeave += days;
@@ -130,7 +127,7 @@ export class LeaveService {
       await this.leaveBalanceRepository.update(userId, balance);
     }
 
-    return updatedLeave!;
+    return updatedLeave;
   }
 
   async updateLeaveStatus(
@@ -144,7 +141,7 @@ export class LeaveService {
       throw new NotFoundException('Leave request not found');
     }
 
-    if (leave.status !== LeaveStatus.PENDING) {
+    if (leave.status !== LeaveStatusEnum.PENDING) {
       throw new BadRequestException('Can only process pending leave requests');
     }
 
@@ -152,18 +149,18 @@ export class LeaveService {
       status: updateLeaveStatusDto.status,
       approverId,
       approvedAt: new Date(),
-      ...(updateLeaveStatusDto.status === LeaveStatus.REJECTED && {
+      ...(updateLeaveStatusDto.status === LeaveStatusEnum.REJECTED && {
         rejectionReason: updateLeaveStatusDto.rejectionReason,
       }),
     });
 
     // 승인된 경우에만 휴가 잔여일수 차감
-    if (updateLeaveStatusDto.status === LeaveStatus.APPROVED) {
+    if (updateLeaveStatusDto.status === LeaveStatusEnum.APPROVED) {
       const balance = await this.leaveBalanceRepository.findByUserId(
         leave.userId,
       );
       if (balance) {
-        if (leave.type === LeaveType.ANNUAL) {
+        if (leave.type === LeaveTypeEnum.ANNUAL) {
           balance.remainingAnnualLeave -= leave.days;
         } else {
           balance.remainingSickLeave -= leave.days;
@@ -172,7 +169,7 @@ export class LeaveService {
       }
     }
 
-    return updatedLeave!;
+    return updatedLeave;
   }
 
   private calculateLeaveDays(startDate: Date, endDate: Date): number {

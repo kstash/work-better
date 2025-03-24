@@ -16,6 +16,10 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@work-better/common": ["libs/common/src"],
+      "@work-better/common/*": ["libs/common/src/*"]
+    }
   }
 }

@@ -8,11 +8,23 @@ export interface IUser {
   id: string;
   email: string;
   name: string;
-  employeeId?: string;
-  department?: string;
-  position?: string;
   role: UserRole;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  firstName?: string;
+  lastName?: string;
+  profileImage?: string;
+  googleId?: string;
+  googleAccessToken?: string;
+  googleRefreshToken?: string;
+  googleTokenExpiry?: Date;
+  employeeId?: string;
+  department?: string;
+  position?: string;
+}
+
+export interface ICredential {
+  email: string;
+  password: string;
 }

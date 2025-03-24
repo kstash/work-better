@@ -8,9 +8,9 @@ import {
   Param,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../services/user.service';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { IUser, ICredentials } from '../interfaces';
+import { UserService } from '../services';
+import { CreateUserDto } from '../dtos';
+import { IUser, ICredential } from '@work-better/common';
 import * as bcrypt from 'bcrypt';
 import { excludePassword } from '../utils';
 
@@ -24,7 +24,7 @@ export class UserController {
   }
 
   @Post('validate')
-  async validateUser(@Body() credentials: ICredentials): Promise<IUser> {
+  async validateUser(@Body() credentials: ICredential): Promise<IUser> {
     const user = await this.userService.findByEmail(credentials.email);
     const isValid = await bcrypt.compare(credentials.password, user.password);
 
@@ -57,5 +57,22 @@ export class UserController {
   @Delete(':id')
   async deleteUser(@Param('id') id: string): Promise<void> {
     await this.userService.delete(id);
+  }
+
+  @Post('oauth/google')
+  async handleGoogleAuth(
+    @Body()
+    googleProfile: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      profileImage: string;
+      googleId: string;
+      googleAccessToken: string;
+      googleRefreshToken: string;
+      googleTokenExpiry: Date;
+    },
+  ): Promise<IUser> {
+    return this.userService.findOrCreateGoogleUser(googleProfile);
   }
 }

@@ -1,33 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { LoginStatus } from '../interfaces/auth.interface';
+import { LoginAttemptStatusEnum } from '../interfaces';
 
 @Schema({ timestamps: true })
 export class LoginAttempt extends Document {
   @Prop({ required: true })
-  userId: string;
-
-  @Prop({ required: true })
-  username: string;
-
-  @Prop({ required: true })
-  success: boolean;
+  email: string;
 
   @Prop({
     required: true,
     type: String,
-    enum: Object.values(LoginStatus),
+    enum: Object.values(LoginAttemptStatusEnum),
   })
-  status: LoginStatus;
+  status: LoginAttemptStatusEnum;
 
-  @Prop()
-  ipAddress?: string;
+  @Prop({ required: true })
+  ipAddress: string;
 
-  @Prop()
-  userAgent?: string;
-
-  @Prop()
-  additionalInfo?: string;
+  @Prop({ required: true })
+  userAgent: string;
 
   @Prop()
   createdAt: Date;

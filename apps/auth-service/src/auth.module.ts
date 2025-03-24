@@ -6,19 +6,17 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { HttpModule } from '@nestjs/axios';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TerminusModule } from '@nestjs/terminus';
-import { AuthController } from './controllers/auth.controller';
-import { HealthController } from './controllers/health.controller';
-import { AuthService } from './services/auth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
 import {
-  LoginAttempt,
-  LoginAttemptSchema,
-} from './entities/login-attempt.entity';
-import { LoginAttemptRepository } from './repositories/login-attempt.repository';
-import { getMongoDBConfig, getRedisConfig } from './config/database.config';
-import { jwtConfig } from './config/jwt.config';
-import { RedisHealthIndicator } from './health/redis.health';
-import { UserServiceHealthIndicator } from './health/user-service.health';
+  AuthController,
+  HealthController,
+  OAuthController,
+} from './controllers';
+import { AuthService } from './services';
+import { JwtStrategy, GoogleStrategy } from './strategies';
+import { LoginAttempt, LoginAttemptSchema } from './entities';
+import { LoginAttemptRepository } from './repositories';
+import { jwtConfig, getMongoDBConfig, getRedisConfig } from './configs';
+import { RedisHealthIndicator, UserServiceHealthIndicator } from './health';
 
 @Module({
   imports: [
@@ -50,10 +48,11 @@ import { UserServiceHealthIndicator } from './health/user-service.health';
     HttpModule,
     TerminusModule,
   ],
-  controllers: [AuthController, HealthController],
+  controllers: [AuthController, HealthController, OAuthController],
   providers: [
     AuthService,
     JwtStrategy,
+    GoogleStrategy,
     LoginAttemptRepository,
     RedisHealthIndicator,
     UserServiceHealthIndicator,

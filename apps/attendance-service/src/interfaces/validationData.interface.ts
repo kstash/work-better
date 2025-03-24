@@ -7,10 +7,14 @@ export interface QRValidationData {
   expirationTime: number; // 밀리초 단위
 }
 
+export interface QRCodeData {
+  generatedAt: string;
+}
+
 export interface GPSValidationData {
   userLocation: Location;
   officeLocation: Location;
   maxDistance: number; // 미터 단위
 }
 
-export type ValidationData = QRValidationData | GPSValidationData;
+export type ValidationDataType = QRValidationData | GPSValidationData;

@@ -5,7 +5,7 @@ import {
   IsEnum,
   MinLength,
 } from 'class-validator';
-import { UserRole } from '../interfaces/user.interface';
+import { UserRole } from '@work-better/common';
 
 export class CreateUserDto {
   @IsEmail()

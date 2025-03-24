@@ -1,14 +1,14 @@
-export enum AttendanceType {
+export enum AttendanceTypeEnum {
   CHECK_IN = 'CHECK_IN',
   CHECK_OUT = 'CHECK_OUT',
 }
 
-export enum ValidationType {
+export enum ValidationTypeEnum {
   GPS = 'GPS',
   QR = 'QR',
 }
 
-export enum AttendanceMethod {
+export enum AttendanceMethodEnum {
   GPS = 'GPS',
   QR = 'QR',
   APPROVAL = 'APPROVAL',
@@ -31,15 +31,11 @@ export interface Location {
   accuracy: number;
 }
 
-export interface IAttendanceValidationStrategy {
-  validate(data: any): Promise<boolean>;
-}
-
 export interface IAttendanceRecord {
   id: string;
   userId: string;
-  type: AttendanceType;
-  method: AttendanceMethod;
+  type: AttendanceTypeEnum;
+  method: AttendanceMethodEnum;
   status: AttendanceStatus;
   location?: Location;
   metadata?: Record<string, any>;

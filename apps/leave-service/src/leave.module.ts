@@ -16,7 +16,7 @@ import { HealthController } from './controllers/health.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LeaveRepository } from './repositories/leave.repository';
 import { LeaveBalanceRepository } from './repositories/leave-balance.repository';
-import { getMongoDBConfig, getRedisConfig } from './config/database.config';
+import { getMongoDBConfig, getRedisConfig } from './configs/database.config';
 import { RedisHealthIndicator } from './health/redis.health';
 
 @Module({
