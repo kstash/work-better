@@ -19,7 +19,7 @@ export class HealthController {
   @Get()
   @HealthCheck()
   async check() {
-    const mongo_uri = this.configService.get<string>('MONGO_URI') as string;
+    const mongo_uri = this.configService.get<string>('MONGO_URI');
     const result = await this.health.check([
       () => this.mongo.pingCheck('mongodb', { connection: mongo_uri }),
       () => this.redis.pingCheck(),

@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Location,
-  IAttendanceValidationStrategy,
-} from '../interfaces/attendance.interface';
-import { GPSValidationData } from '../interfaces/validationData.interface';
-
+import { Location, ValidationDataType, GPSValidationData } from '../interfaces';
+import { AttendanceValidationStrategy } from './base.strategy';
 @Injectable()
-export class GPSValidationStrategy implements IAttendanceValidationStrategy {
-  async validate(data: any): Promise<boolean> {
+export class GPSValidationStrategy implements AttendanceValidationStrategy {
+  async validate(data: ValidationDataType): Promise<boolean> {
     const gpsData = data as GPSValidationData;
     const distance = this.calculateDistance(
       gpsData.userLocation,

@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import {
-  AttendanceType,
-  AttendanceMethod,
+  AttendanceTypeEnum,
+  AttendanceMethodEnum,
   AttendanceStatus,
   Location,
-  ValidationType,
-} from '../interfaces/attendance.interface';
-import { ValidationData } from '../interfaces/validationData.interface';
+  ValidationTypeEnum,
+} from '../interfaces';
+import { ValidationDataType } from '../interfaces';
 
 @Schema({ timestamps: true })
 export class Attendance extends Document {
@@ -17,26 +17,26 @@ export class Attendance extends Document {
   @Prop({
     required: true,
     type: String,
-    enum: Object.values(AttendanceType),
+    enum: Object.values(AttendanceTypeEnum),
   })
-  type: AttendanceType;
+  type: AttendanceTypeEnum;
 
   @Prop({
     required: true,
     type: String,
-    enum: Object.values(ValidationType),
+    enum: Object.values(ValidationTypeEnum),
   })
-  validationType: ValidationType;
+  validationType: ValidationTypeEnum;
 
   @Prop({ type: Object })
-  validationData: ValidationData;
+  validationData: ValidationDataType;
 
   @Prop({
     required: true,
     type: String,
-    enum: Object.values(AttendanceMethod),
+    enum: Object.values(AttendanceMethodEnum),
   })
-  method: AttendanceMethod;
+  method: AttendanceMethodEnum;
 
   @Prop({
     required: true,
