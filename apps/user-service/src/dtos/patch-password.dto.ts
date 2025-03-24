@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 
 export function IsAvailablePassword(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'isAvailablePassword',
       target: object.constructor,
