@@ -3,15 +3,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { TerminusModule } from '@nestjs/terminus';
-import { AttendanceController } from './controllers/attendance.controller';
-import { HealthController } from './controllers/health.controller';
-import { AttendanceService } from './services/attendance.service';
-import { Attendance, AttendanceSchema } from './entities/attendance.entity';
-import { GPSValidationStrategy } from './strategies/gps-validation.strategy';
-import { QRValidationStrategy } from './strategies/qr-validation.strategy';
-import { AttendanceRepository } from './repositories/attendance.repository';
-import { getMongoDBConfig, getRedisConfig } from './config/database.config';
-import { RedisHealthIndicator } from './health/redis.health';
+import { AttendanceController, HealthController } from './controllers';
+import { AttendanceService } from './services';
+import { Attendance, AttendanceSchema } from './entities';
+import { GPSValidationStrategy, QRValidationStrategy } from './strategies';
+import { AttendanceRepository } from './repositories';
+import { getMongoDBConfig, getRedisConfig } from './configs';
+import { RedisHealthIndicator } from './health';
 
 @Module({
   imports: [

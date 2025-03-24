@@ -2,8 +2,25 @@
   "name": "@work-better/user-service",
   "version": "1.0.0",
   "private": true,
+  "description": "User management service for Work Better",
   "scripts": {
-    "dev": "nest start --path ../../dist/apps/user-service/main.js --watch"
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:create": "npm run typeorm -- migration:create",
+    "migration:generate": "npm run typeorm -- migration:generate -d src/config/typeorm.config.ts",
+    "migration:run": "npm run typeorm -- migration:run -d src/config/typeorm.config.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d src/config/typeorm.config.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

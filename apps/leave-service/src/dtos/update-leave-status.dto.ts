@@ -1,9 +1,9 @@
 import { IsEnum, IsString, IsOptional } from 'class-validator';
-import { LeaveStatus } from '../entities/leave.entity';
+import { LeaveStatusEnum } from '../interfaces';
 
 export class UpdateLeaveStatusDto {
-  @IsEnum(LeaveStatus)
-  status: LeaveStatus;
+  @IsEnum(LeaveStatusEnum)
+  status: LeaveStatusEnum;
 
   @IsString()
   @IsOptional()

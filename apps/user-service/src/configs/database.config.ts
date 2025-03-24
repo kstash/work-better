@@ -1,39 +1,45 @@
-import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
+import { config } from 'dotenv';
+import { User } from '@work-better/common';
 import { Client } from 'pg';
-import { User } from '../entities/user.entity';
 
-export async function createDatabase(config: ConfigService) {
+config();
+
+const configService = new ConfigService();
+
+// 데이터베이스 생성 유틸리티 함수
+const createDatabase = async (configService: ConfigService) => {
+  const dbName = configService.get<string>('DB_DATABASE');
+
   const client = new Client({
-    host: config.get<string>('DB_HOST'),
-    port: config.get<number>('DB_PORT'),
-    user: config.get<string>('DB_USERNAME'),
-    password: config.get<string>('DB_PASSWORD'),
-    database: 'postgres', // 기본 데이터베이스로 연결
+    host: configService.get<string>('DB_HOST'),
+    port: configService.get<number>('DB_PORT'),
+    user: configService.get<string>('DB_USERNAME'),
+    password: configService.get<string>('DB_PASSWORD'),
+    database: 'postgres', // 기본 데이터베이스에 연결
   });
 
   try {
     await client.connect();
-    const dbName = config.get<string>('DB_DATABASE');
-
-    // 데이터베이스 존재 여부 확인
-    const checkDb = await client.query(
+    // 데이터베이스가 존재하는지 확인
+    const result = await client.query(
       `SELECT 1 FROM pg_database WHERE datname = $1`,
       [dbName],
     );
 
     // 데이터베이스가 없으면 생성
-    if (checkDb.rowCount === 0) {
-      await client.query(`CREATE DATABASE ${dbName}`);
+    if (result.rowCount === 0) {
+      await client.query(`CREATE DATABASE "${dbName}"`);
       console.log(`Database ${dbName} created successfully`);
     }
   } catch (error) {
-    console.error('Error while creating database:', error);
-    throw error;
+    console.error('Error creating database:', error);
   } finally {
     await client.end();
   }
-}
+};
 
 export const getPostgresConfig = async (
   configService: ConfigService,
@@ -61,3 +67,16 @@ export const getPostgresConfig = async (
     },
   };
 };
+
+// TypeORM CLI를 위한 DataSource 설정
+export default new DataSource({
+  type: 'postgres',
+  host: configService.get('DB_HOST'),
+  port: configService.get('DB_PORT'),
+  username: configService.get('DB_USERNAME'),
+  password: configService.get('DB_PASSWORD'),
+  database: configService.get('DB_DATABASE'),
+  entities: [User],
+  migrations: ['src/migrations/*.ts'],
+  synchronize: false,
+});

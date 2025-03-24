@@ -11,8 +11,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { LeaveService } from '../services/leave.service';
-import { CreateLeaveDto } from '../dto/create-leave.dto';
-import { UpdateLeaveStatusDto } from '../dto/update-leave-status.dto';
+import { CreateLeaveDto } from '../dtos/create-leave.dto';
+import { UpdateLeaveStatusDto } from '../dtos/update-leave-status.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 
 @Controller('leaves')

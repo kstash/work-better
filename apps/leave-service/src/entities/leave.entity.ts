@@ -1,17 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-
-export enum LeaveType {
-  ANNUAL = 'ANNUAL', // 연차
-  SICK = 'SICK', // 병가
-}
-
-export enum LeaveStatus {
-  PENDING = 'PENDING', // 승인대기중
-  APPROVED = 'APPROVED', // 승인완료
-  REJECTED = 'REJECTED', // 거절
-  CANCELLED = 'CANCELLED', // 취소
-}
+import { LeaveTypeEnum, LeaveStatusEnum } from '../interfaces';
 
 @Schema({ timestamps: true })
 export class Leave extends Document {
@@ -30,9 +19,9 @@ export class Leave extends Document {
   @Prop({
     required: true,
     type: String,
-    enum: Object.values(LeaveType),
+    enum: Object.values(LeaveTypeEnum),
   })
-  type: LeaveType;
+  type: LeaveTypeEnum;
 
   @Prop({ required: true })
   reason: string;
@@ -40,10 +29,10 @@ export class Leave extends Document {
   @Prop({
     required: true,
     type: String,
-    enum: Object.values(LeaveStatus),
-    default: LeaveStatus.PENDING,
+    enum: Object.values(LeaveStatusEnum),
+    default: LeaveStatusEnum.PENDING,
   })
-  status: LeaveStatus;
+  status: LeaveStatusEnum;
 
   @Prop()
   approverId?: string;

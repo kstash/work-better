@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { getPostgresConfig } from './config/database.config';
-import { User } from './entities/user.entity';
+import { getPostgresConfig } from './configs/database.config';
+import { User } from '@work-better/common';
 import { UserService } from './services/user.service';
 import { UserController } from './controllers/user.controller';
 import { HealthController } from './controllers/health.controller';

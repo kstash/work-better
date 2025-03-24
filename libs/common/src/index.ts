@@ -1,2 +1,5 @@
-export * from './entities/user.entity';
-export * from './interfaces/user.interface';
+// Entities
+export * from './entities';
+
+// Interfaces
+export * from './interfaces';
