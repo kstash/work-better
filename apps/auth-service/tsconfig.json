@@ -19,7 +19,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@work-better/common": ["../../libs/common/src"]
+      "@work-better/common": ["../../libs/common/src"],
+      "@work-better/common/*": ["../../libs/common/src/*"]
     }
   }
 }
