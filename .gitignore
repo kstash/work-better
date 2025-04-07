@@ -156,3 +156,4 @@ docker-compose.yaml
 
 .cursor
 .vscode
+.husky
