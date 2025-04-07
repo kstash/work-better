@@ -8,7 +8,7 @@ import {
   Query,
   BadRequestException,
 } from '@nestjs/common';
-import { AttendanceService } from '../services/attendance.service';
+import { AttendanceService } from '../services';
 import { ValidationDataType, ValidationTypeEnum } from '../interfaces';
 
 @Controller('attendance')

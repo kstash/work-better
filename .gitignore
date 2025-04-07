@@ -153,3 +153,7 @@ docker/volumes/
 docker/init/
 docker-compose.yml
 docker-compose.yaml
+
+.cursor
+.vscode
+.husky

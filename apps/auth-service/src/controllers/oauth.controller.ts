@@ -37,4 +37,31 @@ export class OAuthController {
       return res.redirect(`${frontendUrl}/auth/oauth-error`);
     }
   }
+
+  @Get('naver')
+  @UseGuards(AuthGuard('naver'))
+  async naverAuth() {
+    // Naver 인증 페이지로 리디렉션됨
+    // 이 메서드는 실행되지 않음
+  }
+
+  @Get('naver/callback')
+  @UseGuards(AuthGuard('naver'))
+  async naverAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    // 프론트엔드 URL
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    console.log(req.user);
+
+    try {
+      // req.user는 NaverStrategy의 validate 메서드에서 반환한 값
+      const { accessToken, refreshToken } = req.user as any;
+
+      // 성공 시 프론트엔드로 리디렉션 (토큰 포함)
+      return res.redirect(
+        `${frontendUrl}/auth/oauth-callback?accessToken=${accessToken}&refreshToken=${refreshToken}`,
+      );
+    } catch (error) {
+      // 실패 시 오류 페이지로 리디렉션
+    }
+  }
 }

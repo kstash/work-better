@@ -6,9 +6,16 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create(AuthModule);
   const configService = app.get(ConfigService);
+  const port = configService.get<number>('PORT') as number;
 
   // 전역 파이프 설정
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   // CORS 설정
   app.enableCors({
@@ -19,9 +26,8 @@ async function bootstrap() {
   // 전역 prefix 설정
   app.setGlobalPrefix('auth');
 
-  const port = configService.get<number>('PORT', 3002);
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`Auth service is running on port ${port}`);
 }
 
 void bootstrap();

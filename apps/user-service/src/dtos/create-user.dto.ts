@@ -3,16 +3,21 @@ import {
   IsString,
   IsOptional,
   IsEnum,
-  MinLength,
+  IsStrongPassword,
 } from 'class-validator';
-import { UserRole } from '@work-better/common';
+import { UserRoleEnum } from '@work-better/common';
 
 export class CreateUserDto {
   @IsEmail()
   email: string;
 
   @IsString()
-  @MinLength(8)
+  @IsStrongPassword({
+    minLength: 8,
+    minLowercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+  })
   password: string;
 
   @IsString()
@@ -30,7 +35,7 @@ export class CreateUserDto {
   @IsOptional()
   position?: string;
 
-  @IsEnum(UserRole)
+  @IsEnum(UserRoleEnum)
   @IsOptional()
-  role?: UserRole;
+  role?: UserRoleEnum;
 }

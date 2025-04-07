@@ -15,7 +15,7 @@ import {
   RefreshTokenResponse,
   LoginAttemptStatusEnum,
   TokenTypeEnum,
-  GoogleProfile,
+  IProfile,
 } from '../interfaces';
 import { LoginAttemptRepository } from '../repositories';
 import { ICredential, User } from '@work-better/common';
@@ -140,24 +140,22 @@ export class AuthService {
     await this.redis.del(`refresh_token:${userId}`);
   }
 
-  async validateOrCreateGoogleUser(
-    googleProfile: GoogleProfile,
+  async validateOrCreateProfile(
+    profile: IProfile,
     ipAddress: string,
     userAgent: string,
   ): Promise<LoginResponse> {
-    this.logger.log(`Google 로그인 시도: ${googleProfile.email}`);
+    this.logger.log(`소셜 로그인 시도: ${profile.email}`);
 
     try {
       const userServiceUrl = this.configService.get<string>('USER_SERVICE_URL');
 
-      // 사용자 서비스에 Google 사용자 검증 요청
+      // 사용자 서비스에 소셜 로그인 사용자 검증 요청
       const response = await firstValueFrom(
         this.httpService.post(`${userServiceUrl}/users/oauth/google`, {
-          email: googleProfile.email,
-          firstName: googleProfile.firstName,
-          lastName: googleProfile.lastName,
-          picture: googleProfile.picture,
-          googleId: googleProfile.id,
+          email: profile.email,
+          imageUrl: profile.imageUrl,
+          googleId: profile.id,
         }),
       );
 

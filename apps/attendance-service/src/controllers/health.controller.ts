@@ -5,7 +5,7 @@ import {
   MongooseHealthIndicator,
 } from '@nestjs/terminus';
 import { ConfigService } from '@nestjs/config';
-import { RedisHealthIndicator } from '../health/redis.health';
+import { RedisHealthIndicator } from '@work-better/common';
 
 @Controller('health')
 export class HealthController {
@@ -20,10 +20,17 @@ export class HealthController {
   @HealthCheck()
   async check() {
     const mongo_uri = this.configService.get<string>('MONGO_URI');
+    const redisStatus = await this.redis.isHealthy();
+
     const result = await this.health.check([
       () => this.mongo.pingCheck('mongodb', { connection: mongo_uri }),
-      () => this.redis.pingCheck(),
     ]);
+
+    // Redis 상태 추가
+    result.info = {
+      ...result.info,
+      ...redisStatus,
+    };
 
     if (result.error && Object.keys(result.error).length === 0) {
       const { error, ...cleanResult } = result;

@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../services';
 import { Request } from 'express';
-import { GoogleProfile, LoginResponse } from '../interfaces';
+import { IProfile, LoginResponse } from '../interfaces';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -30,23 +30,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<void> {
     try {
       const { name, emails, photos } = profile;
+      if (!emails || !photos) {
+        throw new BadRequestException('Invalid profile data');
+      }
       const { ip = '', headers } = req;
       const ipAddress = ip;
       const userAgent = headers['user-agent'] || '';
 
-      const googleProfile: GoogleProfile = {
+      const socialProfile: IProfile = {
         id: profile.id,
         email: emails[0].value,
-        firstName: name.givenName,
-        lastName: name.familyName,
-        profileImage: photos[0].value,
-        googleAccessToken: accessToken,
-        googleRefreshToken: refreshToken,
-        googleTokenExpiry: new Date(Date.now() + 3600 * 1000), // 1시간 후
+        imageUrl: photos[0].value,
+        accessToken,
+        refreshToken,
+        tokenExpiry: new Date(Date.now() + 3600 * 1000), // 1시간 후
       };
 
-      const result = await this.authService.validateOrCreateGoogleUser(
-        googleProfile,
+      const result = await this.authService.validateOrCreateProfile(
+        socialProfile,
         ipAddress,
         userAgent,
       );

@@ -111,7 +111,7 @@ export class LeaveService {
     }
 
     // 휴가 상태 업데이트
-    const updatedLeave = await this.leaveRepository.update(leaveId, {
+    const updatedLeave = await this.leaveRepository.updateById(leaveId, {
       status: LeaveStatusEnum.CANCELLED,
     });
 
@@ -145,7 +145,7 @@ export class LeaveService {
       throw new BadRequestException('Can only process pending leave requests');
     }
 
-    const updatedLeave = await this.leaveRepository.update(leaveId, {
+    const updatedLeave = await this.leaveRepository.updateById(leaveId, {
       status: updateLeaveStatusDto.status,
       approverId,
       approvedAt: new Date(),

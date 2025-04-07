@@ -1,24 +1,26 @@
 import { Controller, Get } from '@nestjs/common';
-import { PostgreSQLHealthIndicator } from '../health/postgresql.health';
-import { HealthIndicatorStatusEnum } from '../health/types/health.types';
+import {
+  PostgresHealthIndicator,
+  HealthIndicatorStatusEnum,
+} from '@work-better/common';
 
 @Controller('health')
 export class HealthController {
-  constructor(private readonly postgresql: PostgreSQLHealthIndicator) {}
+  constructor(private readonly postgres: PostgresHealthIndicator) {}
 
   @Get()
   async check() {
-    const postgresqlStatus = await this.postgresql.isHealthy();
+    const postgresStatus = await this.postgres.isHealthy();
 
     const isHealthy =
-      postgresqlStatus.postgresql.status === HealthIndicatorStatusEnum.UP;
+      postgresStatus.postgres.status === HealthIndicatorStatusEnum.UP;
 
     return {
       status: isHealthy
         ? HealthIndicatorStatusEnum.UP
         : HealthIndicatorStatusEnum.DOWN,
       info: {
-        postgresql: postgresqlStatus.postgresql,
+        postgres: postgresStatus.postgres,
       },
     };
   }

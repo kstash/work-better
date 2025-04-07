@@ -6,7 +6,9 @@
   "root": ".",
   "compilerOptions": {
     "webpack": true,
-    "tsConfigPath": "tsconfig.json"
+    "tsConfigPath": "tsconfig.json",
+    "builder": "webpack",
+    "deleteOutDir": true
   },
   "projects": {
     "user-service": {
@@ -15,7 +17,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/user-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/user-service/tsconfig.app.json"
+        "tsConfigPath": "apps/user-service/tsconfig.json",
+        "assets": ["**/*.proto"],
+        "watchAssets": true
       }
     },
     "auth-service": {
@@ -24,7 +28,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/auth-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/auth-service/tsconfig.app.json"
+        "tsConfigPath": "apps/auth-service/tsconfig.json",
+        "assets": ["**/*.proto"],
+        "watchAssets": true
       }
     },
     "attendance-service": {
@@ -33,7 +39,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/attendance-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/attendance-service/tsconfig.app.json"
+        "tsConfigPath": "apps/attendance-service/tsconfig.json",
+        "assets": ["**/*.proto"],
+        "watchAssets": true
       }
     },
     "leave-service": {
@@ -42,7 +50,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/leave-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/leave-service/tsconfig.app.json"
+        "tsConfigPath": "apps/leave-service/tsconfig.json",
+        "assets": ["**/*.proto"],
+        "watchAssets": true
       }
     },
     "common": {
@@ -51,16 +61,7 @@
       "entryFile": "index",
       "sourceRoot": "libs/common/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/common/tsconfig.lib.json"
-      }
-    },
-    "shared": {
-      "type": "library",
-      "root": "libs/shared",
-      "entryFile": "index",
-      "sourceRoot": "libs/shared/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/shared/tsconfig.lib.json"
+        "tsConfigPath": "libs/common/tsconfig.json"
       }
     }
   }
