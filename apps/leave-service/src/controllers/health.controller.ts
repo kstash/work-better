@@ -19,7 +19,7 @@ export class HealthController {
   @HealthCheck()
   async check(): Promise<HealthCheckResult> {
     const result = await this.health.check([
-      () => this.mongo.pingCheck('mongodb'),
+      () => this.mongo.pingCheck('mongo'),
       () => this.redis.pingCheck(),
     ]);
 

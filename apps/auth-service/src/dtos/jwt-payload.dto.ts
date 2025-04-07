@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsString } from 'class-validator';
-import { UserRole } from '@work-better/common';
+import { UserRoleEnum } from '@work-better/common';
 
 export class JwtPayloadDto {
   @IsString()
@@ -8,7 +8,7 @@ export class JwtPayloadDto {
   @IsEmail()
   email: string;
 
-  @IsEnum(UserRole)
+  @IsEnum(UserRoleEnum)
   role: string;
 
   constructor(partial: Partial<JwtPayloadDto>) {

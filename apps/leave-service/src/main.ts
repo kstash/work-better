@@ -5,7 +5,10 @@ import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(LeaveModule);
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('PORT') as number;
 
+  // 전역 파이프 설정
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -14,8 +17,14 @@ async function bootstrap() {
     }),
   );
 
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT') || 3004;
+  // CORS 설정
+  app.enableCors({
+    origin: configService.get<string>('FRONTEND_URL'),
+    credentials: true,
+  });
+
+  // 전역 prefix 설정
+  app.setGlobalPrefix('leave');
 
   await app.listen(port);
   console.log(`Leave service is running on port ${port}`);

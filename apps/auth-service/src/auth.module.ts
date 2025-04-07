@@ -12,23 +12,26 @@ import {
   OAuthController,
 } from './controllers';
 import { AuthService } from './services';
-import { JwtStrategy, GoogleStrategy } from './strategies';
+import { JwtStrategy, GoogleStrategy, NaverStrategy } from './strategies';
 import { LoginAttempt, LoginAttemptSchema } from './entities';
 import { LoginAttemptRepository } from './repositories';
-import { jwtConfig, getMongoDBConfig, getRedisConfig } from './configs';
+import { jwtConfig } from './configs';
 import { RedisHealthIndicator, UserServiceHealthIndicator } from './health';
+import { getMongoConfig, getRedisConfig } from '@work-better/common';
+import * as path from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath:
         process.env.NODE_ENV === 'production'
-          ? 'apps/auth-service/.env.production'
-          : 'apps/auth-service/.env',
+          ? path.resolve(process.cwd(), '.env.production')
+          : path.resolve(process.cwd(), '.env'),
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: getMongoDBConfig,
+      useFactory: getMongoConfig,
       inject: [ConfigService],
     }),
     MongooseModule.forFeature([
@@ -53,6 +56,7 @@ import { RedisHealthIndicator, UserServiceHealthIndicator } from './health';
     AuthService,
     JwtStrategy,
     GoogleStrategy,
+    NaverStrategy,
     LoginAttemptRepository,
     RedisHealthIndicator,
     UserServiceHealthIndicator,

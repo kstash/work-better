@@ -1,4 +1,4 @@
-export enum UserRole {
+export enum UserRoleEnum {
   ADMIN = 'ADMIN',
   MANAGER = 'MANAGER',
   EMPLOYEE = 'EMPLOYEE',
@@ -7,21 +7,18 @@ export enum UserRole {
 export interface IUser {
   id: string;
   email: string;
+  password: string;
   name: string;
-  role: UserRole;
+  role: UserRoleEnum;
   isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  firstName?: string;
-  lastName?: string;
-  profileImage?: string;
-  googleId?: string;
-  googleAccessToken?: string;
-  googleRefreshToken?: string;
-  googleTokenExpiry?: Date;
+
+  phoneNumber?: string;
   employeeId?: string;
   department?: string;
   position?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ICredential {

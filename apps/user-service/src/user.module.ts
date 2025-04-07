@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { getPostgresConfig } from './configs/database.config';
+import { getPostgresConfig } from '@work-better/common';
 import { User } from '@work-better/common';
 import { UserService } from './services/user.service';
 import { UserController } from './controllers/user.controller';
 import { HealthController } from './controllers/health.controller';
-import { PostgreSQLHealthIndicator } from './health/postgresql.health';
+import { PostgresHealthIndicator } from '@work-better/common';
 
 @Module({
   imports: [
@@ -25,6 +25,6 @@ import { PostgreSQLHealthIndicator } from './health/postgresql.health';
     TypeOrmModule.forFeature([User]),
   ],
   controllers: [UserController, HealthController],
-  providers: [UserService, PostgreSQLHealthIndicator],
+  providers: [UserService, PostgresHealthIndicator],
 })
 export class UserModule {}

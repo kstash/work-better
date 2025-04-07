@@ -1,3 +1,3 @@
 export * from './auth.interface';
 export * from './login-attempt.interface';
-export * from './google-profile.interface';
+export * from './profile';

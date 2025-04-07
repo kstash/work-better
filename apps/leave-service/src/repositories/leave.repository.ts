@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Leave } from '../entities/leave.entity';
@@ -11,20 +15,42 @@ export class LeaveRepository {
   ) {}
 
   async create(leave: Partial<Leave>): Promise<Leave> {
-    const createdLeave = new this.leaveModel(leave);
-    return createdLeave.save();
+    try {
+      const createdLeave = new this.leaveModel(leave);
+      return await createdLeave.save();
+    } catch (error) {
+      throw new InternalServerErrorException('Leave create failed');
+    }
   }
 
   async findByUserId(userId: string): Promise<Leave[]> {
-    return this.leaveModel.find({ userId }).sort({ startDate: -1 }).exec();
+    try {
+      return await this.leaveModel
+        .find({ userId })
+        .sort({ startDate: -1 })
+        .exec();
+    } catch (error) {
+      throw new InternalServerErrorException('Leave find failed');
+    }
   }
 
-  async findById(id: string): Promise<Leave | null> {
-    return this.leaveModel.findById(id).exec();
+  async findById(id: string): Promise<Leave> {
+    const leave = await this.leaveModel.findById(id).exec();
+    if (!leave) {
+      throw new NotFoundException('Leave not found');
+    }
+    return leave;
   }
 
-  async update(id: string, leave: Partial<Leave>): Promise<Leave | null> {
-    return this.leaveModel.findByIdAndUpdate(id, leave, { new: true }).exec();
+  async updateById(id: string, data: Partial<Leave>): Promise<Leave> {
+    try {
+      const leave = await this.findById(id);
+      Object.assign(leave, data);
+      const updatedLeave = await leave.updateOne(data);
+      return updatedLeave;
+    } catch (error) {
+      throw new InternalServerErrorException('Leave update failed');
+    }
   }
 
   async findByDateRange(
@@ -32,14 +58,18 @@ export class LeaveRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<Leave[]> {
-    return this.leaveModel
-      .find({
-        userId,
-        startDate: { $gte: startDate },
-        endDate: { $lte: endDate },
-      })
-      .sort({ startDate: -1 })
-      .exec();
+    try {
+      return await this.leaveModel
+        .find({
+          userId,
+          startDate: { $gte: startDate },
+          endDate: { $lte: endDate },
+        })
+        .sort({ startDate: -1 })
+        .exec();
+    } catch (error) {
+      throw new InternalServerErrorException('Leave find failed');
+    }
   }
 
   async findOverlappingLeaves(
@@ -47,16 +77,20 @@ export class LeaveRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<Leave[]> {
-    return this.leaveModel
-      .find({
-        userId,
-        $or: [
-          {
-            startDate: { $lte: endDate },
-            endDate: { $gte: startDate },
-          },
-        ],
-      })
-      .exec();
+    try {
+      return await this.leaveModel
+        .find({
+          userId,
+          $or: [
+            {
+              startDate: { $lte: endDate },
+              endDate: { $gte: startDate },
+            },
+          ],
+        })
+        .exec();
+    } catch (error) {
+      throw new InternalServerErrorException('Leave find failed');
+    }
   }
 }

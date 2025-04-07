@@ -1,4 +1,4 @@
-import { UserRole } from '../interfaces';
+import { UserRoleEnum } from '../interfaces';
 import {
   Entity,
   Column,
@@ -21,24 +21,15 @@ export class User {
   @Column()
   name: string;
 
-  @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
-
   @Column({
     type: 'enum',
-    enum: UserRole,
-    default: UserRole.EMPLOYEE,
+    enum: UserRoleEnum,
+    default: UserRoleEnum.EMPLOYEE,
   })
-  role: UserRole;
+  role: UserRoleEnum;
 
   @Column({ default: true })
   isActive: boolean;
-
-  @Column({ nullable: true })
-  profileImage?: string;
 
   @Column({ nullable: true })
   phoneNumber?: string;
@@ -48,18 +39,6 @@ export class User {
 
   @Column({ nullable: true })
   position?: string;
-
-  @Column({ nullable: true })
-  googleId?: string;
-
-  @Column({ nullable: true })
-  googleAccessToken?: string;
-
-  @Column({ nullable: true })
-  googleRefreshToken?: string;
-
-  @Column({ nullable: true })
-  googleTokenExpiry?: Date;
 
   @CreateDateColumn()
   createdAt: Date;

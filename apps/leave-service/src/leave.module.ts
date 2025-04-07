@@ -16,8 +16,8 @@ import { HealthController } from './controllers/health.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LeaveRepository } from './repositories/leave.repository';
 import { LeaveBalanceRepository } from './repositories/leave-balance.repository';
-import { getMongoDBConfig, getRedisConfig } from './configs/database.config';
 import { RedisHealthIndicator } from './health/redis.health';
+import { getMongoConfig, getRedisConfig } from '@work-better/common';
 
 @Module({
   imports: [
@@ -31,7 +31,7 @@ import { RedisHealthIndicator } from './health/redis.health';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: getMongoDBConfig,
+      useFactory: getMongoConfig,
       inject: [ConfigService],
     }),
     MongooseModule.forFeature([

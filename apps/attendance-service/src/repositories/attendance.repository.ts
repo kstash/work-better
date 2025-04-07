@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Attendance } from '../entities/attendance.entity';
+import { Attendance } from '../entities';
 
+// TODO: 예외처리 작업 필요
 @Injectable()
 export class AttendanceRepository {
   constructor(
