@@ -1,0 +1,33 @@
+{
+  "name": "@work-better/core",
+  "version": "1.0.0",
+  "description": "Core library for WorkBetter",
+  "author": "Seungtae Kim",
+  "license": "MIT",
+  "keywords": [
+    "work-better",
+    "core",
+    "nestjs",
+    "typescript"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.0.16",
+    "@nestjs/core": "11.0.16",
+    "@nestjs/typeorm": "11.0.0",
+    "dotenv": "16.5.0",
+    "express-session": "1.17.3",
+    "reflect-metadata": "0.1.13",
+    "rxjs": "7.8.1",
+    "typeorm": "0.3.20"
+  },
+  "devDependencies": {
+    "typescript": "5.2.2",
+    "@types/express-session": "1.17.6"
+  }
+}
