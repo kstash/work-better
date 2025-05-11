@@ -16,7 +16,7 @@ importers:
         specifier: 10.8.0
         version: 10.8.0
 
-  apps/attendance-service:
+  apps/attendance:
     dependencies:
       '@nestjs/common':
         specifier: 11.0.16
@@ -74,7 +74,7 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  apps/auth-service:
+  apps/auth:
     dependencies:
       '@nestjs/common':
         specifier: 11.0.16
@@ -159,7 +159,7 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  apps/company-service:
+  apps/company:
     dependencies:
       '@nestjs/common':
         specifier: 11.0.16
@@ -214,7 +214,7 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  apps/leave-service:
+  apps/leave:
     dependencies:
       '@nestjs/common':
         specifier: 11.0.16
@@ -269,7 +269,7 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  apps/salary-service:
+  apps/salary:
     dependencies:
       '@nestjs/common':
         specifier: 11.0.16
@@ -324,7 +324,7 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  apps/user-service:
+  apps/user:
     dependencies:
       '@nestjs/common':
         specifier: 11.0.16

@@ -9,7 +9,7 @@ MSA 구조로 만들어진 백엔드 통합 모노 레포지토리입니다.
 
 ```
 apps
-    /auth-service >> [submodule]
+    /auth >> [submodule]
         /src
             /grpc
               /protos >> [submodule]
@@ -19,7 +19,7 @@ apps
             auth.module.ts
             main.ts
         ...
-    /user-service >> [submodule]
+    /user >> [submodule]
         ...
     / ...
 ```

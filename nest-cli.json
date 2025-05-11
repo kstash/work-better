@@ -11,46 +11,46 @@
     "deleteOutDir": true
   },
   "projects": {
-    "user-service": {
+    "user": {
       "type": "application",
-      "root": "apps/user-service",
+      "root": "apps/user",
       "entryFile": "main",
-      "sourceRoot": "apps/user-service/src",
+      "sourceRoot": "apps/user/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/user-service/tsconfig.json",
+        "tsConfigPath": "apps/user/tsconfig.json",
         "assets": ["**/*.proto"],
         "watchAssets": true
       }
     },
-    "auth-service": {
+    "auth": {
       "type": "application",
-      "root": "apps/auth-service",
+      "root": "apps/auth",
       "entryFile": "main",
-      "sourceRoot": "apps/auth-service/src",
+      "sourceRoot": "apps/auth/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/auth-service/tsconfig.json",
+        "tsConfigPath": "apps/auth/tsconfig.json",
         "assets": ["**/*.proto"],
         "watchAssets": true
       }
     },
-    "attendance-service": {
+    "attendance": {
       "type": "application",
-      "root": "apps/attendance-service",
+      "root": "apps/attendance",
       "entryFile": "main",
-      "sourceRoot": "apps/attendance-service/src",
+      "sourceRoot": "apps/attendance/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/attendance-service/tsconfig.json",
+        "tsConfigPath": "apps/attendance/tsconfig.json",
         "assets": ["**/*.proto"],
         "watchAssets": true
       }
     },
-    "leave-service": {
+    "leave": {
       "type": "application",
-      "root": "apps/leave-service",
+      "root": "apps/leave",
       "entryFile": "main",
-      "sourceRoot": "apps/leave-service/src",
+      "sourceRoot": "apps/leave/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/leave-service/tsconfig.json",
+        "tsConfigPath": "apps/leave/tsconfig.json",
         "assets": ["**/*.proto"],
         "watchAssets": true
       }

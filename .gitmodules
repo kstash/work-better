@@ -1,24 +1,24 @@
-[submodule "apps/auth-service"]
-	path = apps/auth-service
+[submodule "apps/auth"]
+	path = apps/auth
 	url = https://github.com/kstash/work-better-auth.git
 	branch = main
-[submodule "apps/user-service"]
-	path = apps/user-service
+[submodule "apps/user"]
+	path = apps/user
 	url = https://github.com/kstash/work-better-user.git
 	branch = main
-[submodule "apps/attendance-service"]
-	path = apps/attendance-service
+[submodule "apps/attendance"]
+	path = apps/attendance
 	url = https://github.com/kstash/work-better-attendance.git
 	branch = main
-[submodule "apps/leave-service"]
-	path = apps/leave-service
+[submodule "apps/leave"]
+	path = apps/leave
 	url = https://github.com/kstash/work-better-leave.git
 	branch = main
-[submodule "apps/company-service"]
-	path = apps/company-service
+[submodule "apps/company"]
+	path = apps/company
 	url = https://github.com/kstash/work-better-company.git
 	branch = main
-[submodule "apps/salary-service"]
-	path = apps/salary-service
+[submodule "apps/salary"]
+	path = apps/salary
 	url = https://github.com/kstash/work-better-salary.git
 	branch = main
